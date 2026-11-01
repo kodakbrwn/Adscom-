@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adscom Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f9;color:#172033;font-family:Arial,sans-serif}
+header{background:#101d36;color:white;padding:22px}
+header h1{margin:0;font-size:24px}
+header p{margin:7px 0 0;color:#cbd5e1}
+main{max-width:950px;margin:25px auto;padding:0 15px}
+.panel{background:white;padding:22px;border-radius:12px;margin-bottom:18px;box-shadow:0 2px 12px #0000000c}
+input{width:100%;padding:13px;margin:8px 0;border:1px solid #ccd3df;border-radius:7px}
+button{padding:10px 15px;border:0;border-radius:7px;cursor:pointer;font-weight:bold;margin:4px}
+.primary{background:#173b78;color:white}
+.approve{background:#16834a;color:white}
+.reject{background:#b45309;color:white}
+.delete{background:#b42318;color:white}
+.logout{background:#e2e8f0;color:#172033}
+.ad{border:1px solid #e0e5ed;padding:17px;border-radius:10px;margin:14px 0}
+.ad h3{margin:5px 0 10px}
+.muted{color:#64748b;font-size:14px}
+.status{font-weight:bold;text-transform:capitalize}
+#message{padding:10px 0;color:#b42318}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+<h1>Adscom Admin</h1>
+<p>Private advertisement management</p>
+</header>
+
+<main>
+<section class="panel" id="loginPanel">
+<h2>Administrator Login</h2>
+<p class="muted">Sign in with your registered Adscom administrator account.</p>
+<form id="loginForm">
+<input id="email" type="email" placeholder="Email address" required>
+<input id="password" type="password" placeholder="Password" required>
+<button class="primary" type="submit">Sign in</button>
+</form>
+<div id="loginMessage"></div>
+</section>
+
+<section id="dashboard" hidden>
+<div class="panel">
+<h2>Advertisement Management</h2>
+<p id="welcome" class="muted"></p>
+<button class="primary" id="refreshBtn">Refresh ads</button>
+<button class="logout" id="logoutBtn">Log out</button>
+<div id="message"></div>
+</div>
+<div class="panel">
+<h2>Submitted Advertisements</h2>
+<div id="adsList">Loading advertisements...</div>
+</div>
+</section>
+</main>
+
+<script>
+const SUPABASE_URL = "https://ntumprvtrrydewjiqom.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_w-5sUHERnDT0G3sdqoI3ZQ_WOZ_t_lE";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const loginPanel = document.getElementById("loginPanel");
+const dashboard = document.getElementById("dashboard");
+const loginMessage = document.getElementById("loginMessage");
+const message = document.getElementById("message");
+const adsList = document.getElementById("adsList");
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+async function checkAdmin() {
+  const {data:{session}, error} = await db.auth.getSession();
+
+  if (error || !session) {
+    loginPanel.hidden = false;
+    dashboard.hidden = true;
+    return;
+  }
+
+  const {data:isAdmin, error:adminError} =
+    await db.rpc("is_adscom_admin");
+
+  if (adminError || isAdmin !== true) {
+    loginPanel.hidden = false;
+    dashboard.hidden = true;
+    loginMessage.textContent =
+      "This account is not authorized to access the admin dashboard.";
+    return;
+  }
+
+  loginPanel.hidden = true;
+  dashboard.hidden = false;
+  document.getElementById("welcome").textContent =
+    "Administrator: " + session.user.email;
+
+  await loadAds();
+}
+
+async function loadAds() {
+  adsList.textContent = "Loading advertisements...";
+  message.textContent = "";
+
+  const {data, error} = await db
+    .from("ads")
+    .select("*")
+    .order("created_at", {ascending:false});
+
+  if (error) {
+    adsList.textContent = "Could not load ads: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    adsList.textContent = "No advertisements found.";
+    return;
+  }
+
+  adsList.innerHTML = data.map(ad => `
+    <article class="ad">
+      <h3>${escapeHTML(ad.title)}</h3>
+      <p>${escapeHTML(ad.description)}</p>
+      <p><b>Category:</b> ${escapeHTML(ad.category)}</p>
+      <p><b>Price:</b> ${escapeHTML(ad.price)}</p>
+      <p><b>Location:</b> ${escapeHTML(ad.location)}</p>
+      <p><b>Contact:</b> ${escapeHTML(ad.contact)}</p>
+      <p><b>Status:</b> <span class="status">${escapeHTML(ad.status)}</span></p>
+      <p class="muted">Submitted: ${escapeHTML(ad.created_at)}</p>
+      <button class="approve" data-action="approve" data-id="${escapeHTML(ad.id)}">Approve</button>
+      <button class="reject" data-action="reject" data-id="${escapeHTML(ad.id)}">Reject</button>
+      <button class="delete" data-action="delete" data-id="${escapeHTML(ad.id)}">Delete</button>
+    </article>
+  `).join("");
+}
+
+async function changeStatus(id, status) {
+  message.textContent = "Updating advertisement...";
+
+  const {error} = await db
+    .from("ads")
+    .update({status})
+    .eq("id", id);
+
+  if (error) {
+    message.textContent = "Update failed: " + error.message;
+    return;
+  }
+
+  message.textContent = "Advertisement marked " + status + ".";
+  await loadAds();
+}
+
+adsList.addEventListener("click", async event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const id = button.dataset.id;
+  const action = button.dataset.action;
+
+  if (action === "approve") {
+    await changeStatus(id, "approved");
+  }
+
+  if (action === "reject") {
+    await changeStatus(id, "rejected");
+  }
+
+  if (action === "delete") {
+    if (!confirm("Permanently delete this advertisement?")) return;
+
+    const {error} = await db
+      .from("ads")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      message.textContent = "Delete failed: " + error.message;
+      return;
+    }
+
+    message.textContent = "Advertisement deleted.";
+    await loadAds();
+  }
+});
+
+document.getElementById("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  loginMessage.textContent = "Signing in...";
+
+  const {error} = await db.auth.signInWithPassword({
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value
+  });
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
+  }
+
+  loginMessage.textContent = "";
+  await checkAdmin();
+});
+
+document.getElementById("refreshBtn").addEventListener("click", loadAds);
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await db.auth.signOut();
+  dashboard.hidden = true;
+  loginPanel.hidden = false;
+  loginMessage.textContent = "You have signed out.";
+});
+
+checkAdmin();
+</script>
+</body>
+  </html>
+  
