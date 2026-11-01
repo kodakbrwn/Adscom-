@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Adscom is a simple worldwide marketplace for discovering products, services and business advertisements." />
+  <title>Adscom — Discover. Advertise. Connect.</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #687386;
+      --brand: #3157d5;
+      --brand-dark: #2445b5;
+      --line: #e7eaf0;
+      --surface: #ffffff;
+      --soft: #f5f7fb;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #fbfcfe; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    .container { width: min(1160px, calc(100% - 40px)); margin: auto; }
+    header { background: white; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+    .nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .logo { font-size: 27px; font-weight: 850; letter-spacing: -1.3px; color: var(--brand); }
+    .logo span { color: var(--ink); }
+    .navlinks { display: flex; align-items: center; gap: 25px; color: #4e596b; font-size: 14px; }
+    .btn { border: 0; border-radius: 11px; padding: 12px 18px; background: var(--brand); color: white; font-weight: 700; cursor: pointer; transition: .18s; }
+    .btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-outline { color: var(--brand); background: white; border: 1px solid #cfd8fb; }
+    .btn-outline:hover { background: #f2f5ff; }
+    .hero { padding: 76px 0 64px; background: radial-gradient(circle at 85% 15%, #e4eaff 0, transparent 28%), linear-gradient(135deg, #f6f8ff, #fbfcfe 65%); }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--brand); background: #eaf0ff; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .3px; text-transform: uppercase; }
+    h1 { font-size: clamp(40px, 5vw, 62px); line-height: 1.04; letter-spacing: -2.5px; margin: 18px 0; max-width: 650px; }
+    .hero p { color: var(--muted); font-size: 17px; line-height: 1.7; max-width: 570px; }
+    .searchbox { margin-top: 28px; display: flex; padding: 7px; background: white; border: 1px solid var(--line); box-shadow: 0 12px 35px #26365a12; border-radius: 14px; gap: 8px; max-width: 630px; }
+    .searchbox input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 11px 12px; color: var(--ink); }
+    .hero-note { font-size: 12px !important; margin-top: 12px; }
+    .hero-art { min-height: 330px; border-radius: 28px; background: linear-gradient(145deg, #3157d5, #7690ef); padding: 28px; color: white; position: relative; overflow: hidden; box-shadow: 0 25px 55px #3157d533; }
+    .hero-art:before, .hero-art:after { content: ""; position: absolute; border: 1px solid #ffffff35; border-radius: 50%; }
+    .hero-art:before { width: 310px; height: 310px; right: -85px; top: -95px; }
+    .hero-art:after { width: 220px; height: 220px; right: -40px; top: -50px; }
+    .art-label { position: relative; z-index: 1; font-weight: 800; font-size: 13px; opacity: .85; }
+    .art-card { position: relative; z-index: 1; margin-top: 28px; background: white; color: var(--ink); padding: 18px; border-radius: 17px; width: 82%; box-shadow: 0 15px 35px #152b6b35; }
+    .art-card.small { width: 66%; margin: 14px 0 0 auto; }
+    .art-line { height: 9px; background: #e9edf5; border-radius: 10px; margin-top: 10px; width: 75%; }
+    .art-line.short { width: 45%; }
+    .art-tag { display: inline-block; padding: 5px 9px; border-radius: 20px; color: var(--brand); background: #edf1ff; font-size: 10px; font-weight: 800; }
+    section { padding: 62px 0; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
+    h2 { margin: 0; font-size: 29px; letter-spacing: -1px; }
+    .sub { color: var(--muted); margin: 8px 0 0; font-size: 14px; }
+    .categories { display: grid; grid-template-columns: repeat(6, 1fr); gap: 13px; }
+    .category { background: white; border: 1px solid var(--line); padding: 18px 12px; border-radius: 15px; text-align: center; cursor: pointer; transition: .18s; }
+    .category:hover, .category.active { border-color: #aebefa; background: #f2f5ff; transform: translateY(-2px); }
+    .category .emoji { font-size: 25px; display: block; margin-bottom: 9px; }
+    .category strong { font-size: 12px; }
+    .toolbar { display: flex; gap: 10px; align-items: center; }
+    .toolbar select { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: white; color: var(--ink); }
+    .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .ad-card { border: 1px solid var(--line); border-radius: 17px; overflow: hidden; background: white; transition: .2s; }
+    .ad-card:hover { transform: translateY(-3px); box-shadow: 0 15px 35px #1a2a4b10; }
+    .ad-image { height: 185px; display: grid; place-items: center; font-size: 58px; background: linear-gradient(135deg, #eef2ff, #f8f9fc); }
+    .ad-content { padding: 17px; }
+    .ad-meta { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; }
+    .ad-content h3 { font-size: 17px; margin: 12px 0 7px; }
+    .ad-content p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 14px; min-height: 39px; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f1f5; padding-top: 13px; }
+    .price { font-weight: 850; color: var(--brand); }
+    .text-link { color: var(--brand); font-weight: 750; font-size: 12px; }
+    .empty { grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); background: white; border: 1px dashed #cfd5e2; border-radius: 16px; }
+    .cta { background: #17233f; color: white; border-radius: 24px; padding: 38px 42px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+    .cta h2 { color: white; }
+    .cta p { color: #c3cbe0; margin-bottom: 0; }
+    footer { background: white; border-top: 1px solid var(--line); padding: 30px 0; color: var(--muted); font-size: 12px; }
+    .footer-row { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: #10182b88; z-index: 30; padding: 20px; overflow: auto; }
+    .modal-backdrop.open { display: grid; place-items: center; }
+    .modal { width: min(520px, 100%); background: white; border-radius: 19px; padding: 25px; box-shadow: 0 25px 80px #0003; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .modal h2 { font-size: 23px; }
+    .close { border: 0; background: #f0f2f7; border-radius: 9px; width: 34px; height: 34px; cursor: pointer; font-size: 20px; }
+    .field { margin: 13px 0; }
+    .field label { display: block; font-size: 12px; font-weight: 750; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; border: 1px solid #dfe3ec; border-radius: 10px; padding: 11px 12px; outline-color: #9eaff5; }
+    .field textarea { min-height: 85px; resize: vertical; }
+    .notice { background: #fff8e8; color: #77571a; border: 1px solid #f2dfb3; border-radius: 10px; padding: 11px; font-size: 11px; line-height: 1.5; margin: 14px 0; }
+    @media (max-width: 850px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-art { min-height: 260px; }
+      .categories { grid-template-columns: repeat(3, 1fr); }
+      .ads-grid { grid-template-columns: repeat(2, 1fr); }
+      .navlinks { gap: 12px; }
+    }
+    @media (max-width: 560px) {
+      .container { width: min(100% - 28px, 1160px); }
+      .nav { height: 65px; }
+      .navlinks a:not(.btn) { display: none; }
+      .navlinks .btn { padding: 10px 12px; font-size: 12px; }
+      .hero { padding: 50px 0 42px; }
+      h1 { letter-spacing: -1.6px; }
+      .searchbox { flex-wrap: wrap; }
+      .searchbox input { flex-basis: 100%; }
+      .searchbox button { width: 100%; }
+      section { padding: 45px 0; }
+      .categories { grid-template-columns: repeat(2, 1fr); }
+      .ads-grid { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .cta { padding: 27px 22px; align-items: start; flex-direction: column; }
+      .toolbar { width: 100%; }
+      .toolbar select { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="logo" href="#">Ads<span>com</span></a>
+      <nav class="navlinks" aria-label="Main navigation">
+        <a href="#categories">Categories</a>
+        <a href="#latest">Explore ads</a>
+        <button class="btn btn-outline" id="openAuth">Log in / Sign up</button>
+        <button class="btn" id="openPostTop">＋ Post an ad</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">🌍 Your world. Your marketplace.</span>
+          <h1>Get noticed.<br><span style="color:var(--brand)">Advertise on Adscom.</span></h1>
+          <p>Discover products, services and businesses from around the world — or put your own advertisement in front of more people.</p>
+          <form class="searchbox" id="searchForm">
+            <input id="searchInput" type="search" placeholder="What are you looking for today?" aria-label="Search advertisements" />
+            <button class="btn" type="submit">Search ads</button>
+          </form>
+          <p class="hero-note">Explore listings from different categories and locations.</p>
+        </div>
+        <div class="hero-art" aria-label="Illustration of advertisements">
+          <div class="art-label">ADScom • GLOBAL ADVERTISING</div>
+          <div class="art-card">
+            <span class="art-tag">FEATURED LISTING</span>
+            <div style="font-weight:800;margin-top:12px">Your next customer is here.</div>
+            <div class="art-line"></div><div class="art-line short"></div>
+          </div>
+          <div class="art-card small">
+            <span class="art-tag">PROMOTE YOUR BUSINESS</span>
+            <div style="font-weight:800;margin-top:10px">Reach more people</div>
+            <div class="art-line short"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories">
+      <div class="container">
+        <div class="section-head">
+          <div><h2>Explore categories</h2><p class="sub">Find what you need, or choose a category for your next ad.</p></div>
+        </div>
+        <div class="categories" id="categoryList">
+          <button class="category active" data-category="All"><span class="emoji">✨</span><strong>All ads</strong></button>
+          <button class="category" data-category="Electronics"><span class="emoji">📱</span><strong>Electronics</strong></button>
+          <button class="category" data-category="Vehicles"><span class="emoji">🚗</span><strong>Vehicles</strong></button>
+          <button class="category" data-category="Property"><span class="emoji">🏡</span><strong>Property</strong></button>
+          <button class="category" data-category="Fashion"><span class="emoji">👗</span><strong>Fashion</strong></button>
+          <button class="category" data-category="Services"><span class="emoji">🛠️</span><strong>Services</strong></button>
+          <button class="category" data-category="Jobs"><span class="emoji">💼</span><strong>Jobs</strong></button>
+          <button class="category" data-category="Business"><span class="emoji">🏢</span><strong>Business</strong></button>
+          <button class="category" data-category="Other"><span class="emoji">🌟</span><strong>Other</strong></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="latest" style="background:var(--soft)">
+      <div class="container">
+        <div class="section-head">
+          <div><h2>Latest advertisements</h2><p class="sub">A sample of what you can discover on Adscom.</p></div>
+          <div class="toolbar">
+            <select id="sortSelect" aria-label="Sort advertisements">
+              <option value="recent">Recently added</option>
+              <option value="low">Price: low to high</option>
+              <option value="high">Price: high to low</option>
+            </select>
+          </div>
+        </div>
+        <div class="ads-grid" id="adsGrid"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="cta">
+          <div><h2>Have something to advertise?</h2><p>Create a listing and let more people discover what you offer.</p></div>
+          <button class="btn" id="openPostBottom" style="background:white;color:#2445b5">Post your advertisement →</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <div><a class="logo" href="#" style="font-size:20px">Ads<span>com</span></a><p style="margin:7px 0 0">Discover. Advertise. Connect.</p></div>
+      <div>© <span id="year"></span> Adscom. All rights reserved. <span style="margin-left:10px">Demo homepage</span></div>
+    </div>
+  </footer>
+
+
+  <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal">
+      <div class="modal-head"><h2 id="authTitle">Welcome to Adscom</h2><button class="close" id="closeAuth" aria-label="Close">×</button></div>
+      <form id="authForm">
+        <div class="field"><label for="authEmail">Email address</label><input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com" /></div>
+        <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="At least 6 characters" /></div>
+        <button class="btn" id="authSubmit" type="submit" style="width:100%">Log in</button>
+      </form>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin:16px 0 0"><span id="authSwitchText">New to Adscom?</span> <a href="#" id="authSwitch" class="text-link">Create an account</a></p>
+      <div class="notice">Account creation and login become active after you connect your own Supabase project using the setup guide included with this download.</div>
+      <p id="authMessage" role="status" style="font-size:12px;color:var(--muted)"></p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="postModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-head"><h2 id="modalTitle">Post an advertisement</h2><button class="close" id="closeModal" aria-label="Close">×</button></div>
+      <form id="postForm">
+        <div class="field"><label for="adTitle">Advertisement title</label><input id="adTitle" required maxlength="70" placeholder="e.g. Quality office chairs for sale" /></div>
+        <div class="field"><label for="adCategory">Category</label><select id="adCategory" required><option>Electronics</option><option>Vehicles</option><option>Property</option><option>Fashion</option><option>Services</option><option>Jobs</option><option>Business</option><option>Other</option></select></div>
+        <div class="field"><label for="adPrice">Price (optional)</label><input id="adPrice" type="text" placeholder="e.g. $250 or Contact for price" /></div>
+        <div class="field"><label for="adLocation">Location</label><input id="adLocation" required placeholder="City, Country" /></div>
+        <div class="field"><label for="adContact">Contact email or phone</label><input id="adContact" required placeholder="How can interested people reach you?" /></div>
+        <div class="field"><label for="adDescription">Description</label><textarea id="adDescription" required maxlength="500" placeholder="Describe your product, service or offer..."></textarea></div>
+        <div class="notice">This is a front-end demo. Listings you submit appear on this page during the current browser session only. A live website needs a secure database, user accounts, moderation and payment integration.</div>
+        <button class="btn" type="submit" style="width:100%">Preview my ad</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 1) Create a Supabase project, then paste its Project URL and anon/public key here.
+    // Never put a service_role key in browser code.
+    const SUPABASE_URL = "https://ntumprvtrryydewjiqom.supabase.co/rest/v1/";
+    const SUPABASE_ANON_KEY = "sb_publishable_w-5sUHERnDT0G3sdqoI3ZQ_WOZ_t_lE";
+    const supabaseReady = !!(window.supabase && SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("PASTE_") && !SUPABASE_ANON_KEY.includes("PASTE_"));
+    const db = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+    let currentUser = null;
+    let authMode = "login";
+
+    const sampleAds = [
+      {title:"Modern smartphone in excellent condition",category:"Electronics",price: "$320",location:"London, United Kingdom",description:"Unlocked smartphone, carefully used and in great working condition.",emoji:"📱"},
+      {title:"Reliable family SUV for sale",category:"Vehicles",price:"$8,900",location:"Toronto, Canada",description:"Comfortable family vehicle with a spacious interior and service history.",emoji:"🚙"},
+      {title:"Bright two-bedroom apartment",category:"Property",price:"$1,200 / month",location:"Accra, Ghana",description:"Well-located apartment close to shops, transport and local amenities.",emoji:"🏡"},
+      {title:"Handmade fashion and accessories",category:"Fashion",price:"From $25",location:"Lagos, Nigeria",description:"Distinctive handmade pieces available in a range of styles and sizes.",emoji:"👜"},
+      {title:"Professional website design services",category:"Services",price:"From $150",location:"Remote / Worldwide",description:"Responsive websites for small businesses, creators and growing brands.",emoji:"💻"},
+      {title:"Business partnership opportunity",category:"Business",price:"Contact for details",location:"Dubai, UAE",description:"Connect with a growing team exploring new business opportunities.",emoji:"🤝"}
+    ];
+    let ads = [...sampleAds];
+    let activeCategory = "All";
+    let searchTerm = "";
+
+    const grid = document.getElementById("adsGrid");
+    const moneyValue = value => {
+      const n = Number(String(value).replace(/[^0-9.]/g, ""));
+      return Number.isFinite(n) ? n : null;
+    };
+    function renderAds() {
+      let visible = ads.filter(ad => {
+        const categoryMatch = activeCategory === "All" || ad.category === activeCategory;
+        const text = `${ad.title} ${ad.category} ${ad.location} ${ad.description}`.toLowerCase();
+        return categoryMatch && text.includes(searchTerm);
+      });
+      const sort = document.getElementById("sortSelect").value;
+      if (sort !== "recent") visible.sort((a,b) => {
+        const av = moneyValue(a.price), bv = moneyValue(b.price);
+        if (av === null) return 1;
+        if (bv === null) return -1;
+        return sort === "low" ? av-bv : bv-av;
+      });
+      grid.innerHTML = "";
+      if (!visible.length) {
+        grid.innerHTML = '<div class="empty">No advertisements found. Try another search or category.</div>';
+        return;
+      }
+      visible.forEach(ad => {
+        const card = document.createElement("article");
+        card.className = "ad-card";
+        const image = document.createElement("div");
+        image.className = "ad-image";
+        image.textContent = ad.emoji || "📣";
+        const content = document.createElement("div");
+        content.className = "ad-content";
+        const meta = document.createElement("div");
+        meta.className = "ad-meta";
+        const cat = document.createElement("span"); cat.textContent = ad.category;
+        const loc = document.createElement("span"); loc.textContent = "📍 " + ad.location;
+        meta.append(cat, loc);
+        const title = document.createElement("h3"); title.textContent = ad.title;
+        const desc = document.createElement("p"); desc.textContent = ad.description;
+        const row = document.createElement("div"); row.className = "price-row";
+        const price = document.createElement("span"); price.className = "price"; price.textContent = ad.price || "Contact for price";
+        const contact = document.createElement("a"); contact.className = "text-link"; contact.href = "#"; contact.textContent = "View details →";
+        contact.addEventListener("click", e => { e.preventDefault(); alert(`${ad.title}\\n\\n${ad.description}\\n\\nLocation: ${ad.location}\\nPrice: ${ad.price || "Contact for price"}\\n\\nContact details will be available when Adscom has its live listing system.`); });
+        row.append(price, contact);
+        content.append(meta, title, desc, row);
+        card.append(image, content);
+        grid.append(card);
+      });
+    }
+
+    document.getElementById("categoryList").addEventListener("click", e => {
+      const button = e.target.closest("[data-category]");
+      if (!button) return;
+      activeCategory = button.dataset.category;
+      document.querySelectorAll(".category").forEach(el => el.classList.toggle("active", el === button));
+      renderAds();
+    });
+    document.getElementById("searchForm").addEventListener("submit", e => {
+      e.preventDefault();
+      searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+      document.getElementById("latest").scrollIntoView({behavior:"smooth"});
+      renderAds();
+    });
+    document.getElementById("sortSelect").addEventListener("change", renderAds);
+
+    const modal = document.getElementById("postModal");
+    const openModal = () => modal.classList.add("open");
+    const closeModal = () => modal.classList.remove("open");
+    document.getElementById("openPostTop").addEventListener("click", openModal);
+    document.getElementById("openPostBottom").addEventListener("click", openModal);
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    document.getElementById("postForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const title = document.getElementById("adTitle").value.trim();
+      const category = document.getElementById("adCategory").value;
+      const price = document.getElementById("adPrice").value.trim() || "Contact for price";
+      const location = document.getElementById("adLocation").value.trim();
+      const contact = document.getElementById("adContact").value.trim();
+      const description = document.getElementById("adDescription").value.trim();
+      const emojiMap = {Electronics:"📱",Vehicles:"🚗",Property:"🏡",Fashion:"👗",Services:"🛠️",Jobs:"💼",Business:"🏢",Other:"🌟"};
+
+      if (supabaseReady) {
+        if (!currentUser) {
+          alert("Please log in or create an Adscom account before posting an advertisement.");
+          closeModal(); openAuthModal(); return;
+        }
+        const { error } = await db.from("ads").insert({
+          user_id: currentUser.id, title, category, price, location, contact, description, status: "pending"
+        });
+        if (error) { alert("Could not submit your ad: " + error.message); return; }
+        alert("Your advertisement has been submitted and is waiting for review before it appears publicly.");
+      } else {
+        ads.unshift({title,category,price,location,description,contact,emoji:emojiMap[category] || "📣"});
+        alert("Demo mode: your sample advertisement has been added for this browser session only. Follow the README setup guide to enable accounts and permanent storage.");
+      }
+      activeCategory = "All"; searchTerm = "";
+      document.getElementById("searchInput").value = "";
+      document.querySelectorAll(".category").forEach(el => el.classList.toggle("active", el.dataset.category === "All"));
+      renderAds();
+      e.target.reset(); closeModal();
+      document.getElementById("latest").scrollIntoView({behavior:"smooth"});
+    });
+
+    // Authentication UI and Supabase session handling
+    const authModal = document.getElementById("authModal");
+    const openAuthModal = () => { authModal.classList.add("open"); document.getElementById("authMessage").textContent = supabaseReady ? "" : "Setup required: add your Supabase URL and anon key in index.html, then run the SQL in README.md."; };
+    const closeAuthModal = () => authModal.classList.remove("open");
+    document.getElementById("openAuth").addEventListener("click", openAuthModal);
+    document.getElementById("closeAuth").addEventListener("click", closeAuthModal);
+    authModal.addEventListener("click", e => { if (e.target === authModal) closeAuthModal(); });
+    document.getElementById("authSwitch").addEventListener("click", e => {
+      e.preventDefault();
+      authMode = authMode === "login" ? "signup" : "login";
+      document.getElementById("authTitle").textContent = authMode === "login" ? "Welcome to Adscom" : "Create your Adscom account";
+      document.getElementById("authSubmit").textContent = authMode === "login" ? "Log in" : "Create account";
+      document.getElementById("authSwitchText").textContent = authMode === "login" ? "New to Adscom?" : "Already have an account?";
+      document.getElementById("authSwitch").textContent = authMode === "login" ? "Create an account" : "Log in";
+      document.getElementById("authMessage").textContent = "";
+    });
+    document.getElementById("authForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!supabaseReady) { document.getElementById("authMessage").textContent = "Supabase is not connected yet. Follow the setup guide in README.md."; return; }
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      const message = document.getElementById("authMessage");
+      message.textContent = "Please wait…";
+      const result = authMode === "signup"
+        ? await db.auth.signUp({email, password})
+        : await db.auth.signInWithPassword({email, password});
+      if (result.error) { message.textContent = result.error.message; return; }
+      if (authMode === "signup" && !result.data.session) {
+        message.textContent = "Account created. Check your email to confirm your address, then log in.";
+        return;
+      }
+      currentUser = result.data.user || null;
+      message.textContent = currentUser ? "You are signed in as " + currentUser.email : "Check your email to complete sign-in.";
+      updateAuthButton();
+      if (currentUser) setTimeout(closeAuthModal, 700);
+    });
+
+    function updateAuthButton() {
+      const button = document.getElementById("openAuth");
+      button.textContent = currentUser ? "Account: " + currentUser.email : "Log in / Sign up";
+    }
+    async function loadPublishedAds() {
+      if (!supabaseReady) return;
+      const { data, error } = await db.from("ads").select("id,title,category,price,location,description,contact,created_at").eq("status","approved").order("created_at",{ascending:false}).limit(60);
+      if (error) { console.warn("Adscom database read:", error.message); return; }
+      const emojiMap = {Electronics:"📱",Vehicles:"🚗",Property:"🏡",Fashion:"👗",Services:"🛠️",Jobs:"💼",Business:"🏢",Other:"🌟"};
+      const remoteAds = (data || []).map(ad => ({...ad, emoji:emojiMap[ad.category] || "📣"}));
+      ads = [...remoteAds, ...sampleAds];
+      renderAds();
+    }
+    async function initializeAuth() {
+      if (!supabaseReady) return;
+      const { data } = await db.auth.getSession();
+      currentUser = data.session?.user || null;
+      updateAuthButton();
+      db.auth.onAuthStateChange((_event, session) => {
+        currentUser = session?.user || null;
+        updateAuthButton();
+      });
+      await loadPublishedAds();
+    }
+    initializeAuth();
+    document.getElementById("year").textContent = new Date().getFullYear();
+    renderAds();
+  </script>
+</body>
+</html>
