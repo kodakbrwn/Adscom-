@@ -258,7 +258,7 @@
       {title:"Professional website design services",category:"Services",price:"From $150",location:"Remote / Worldwide",description:"Responsive websites for small businesses, creators and growing brands.",emoji:"💻"},
       {title:"Business partnership opportunity",category:"Business",price:"Contact for details",location:"Dubai, UAE",description:"Connect with a growing team exploring new business opportunities.",emoji:"🤝"}
     ];
-    let ads = [...sampleAds];
+    let ads = [];
     let activeCategory = "All";
     let searchTerm = "";
 
@@ -416,7 +416,7 @@
       if (error) { console.warn("Adscom database read:", error.message); return; }
       const emojiMap = {Electronics:"📱",Vehicles:"🚗",Property:"🏡",Fashion:"👗",Services:"🛠️",Jobs:"💼",Business:"🏢",Other:"🌟"};
       const remoteAds = (data || []).map(ad => ({...ad, emoji:emojiMap[ad.category] || "📣"}));
-      ads = [...remoteAds, ...sampleAds];
+      ads = remoteAds;
       renderAds();
     }
     async function initializeAuth() {
