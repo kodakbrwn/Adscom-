@@ -351,8 +351,8 @@
           closeModal(); openAuthModal(); return;
         }
         const { error } = await db.from("ads").insert({
-          user_id: currentUser.id, title, category, price, location, contact, description, status: "pending"
-        });
+  title, category, price, location, contact, description, status: "pending"
+});
         if (error) { alert("Could not submit your ad: " + error.message); return; }
         alert("Your advertisement has been submitted and is waiting for review before it appears publicly.");
       } else {
