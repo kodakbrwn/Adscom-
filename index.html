@@ -234,9 +234,15 @@
         <div class="field"><label for="adContact">Contact email or phone</label><input id="adContact" required placeholder="How can interested people reach you?" /></div>
         <div class="field"><label for="adDescription">Description</label><textarea id="adDescription" required maxlength="500" placeholder="Describe your product, service or offer..."></textarea></div>
         <div class="field"><label for="adImage">Advertisement photo (optional)</label><input id="adImage" type="file" accept="image/jpeg,image/png,image/webp" /><small style="color:var(--muted)">Choose JPG, PNG or WebP. Maximum size: 5 MB.</small></div>
-        <div class="notice">Your advertisement will be submitted for review by our team before it appears publicly.</div> </div>
-        <button class="btn" type="submit" style="width:100%">Preview my ad</button>
+        <div class="notice">Your advertisement will be submitted for review by our team before it appears publicly.</div>
+        <button class="btn" id="previewAdButton" type="button" style="width:100%">Preview my ad</button>
       </form>
+      <div id="adPreview" style="display:none">
+        <h3 style="margin:0 0 14px">Preview your advertisement</h3>
+        <div id="adPreviewContent"></div>
+        <button class="btn secondary" id="editAdButton" type="button" style="width:100%;margin-top:12px">Back to edit</button>
+        <button class="btn" id="confirmAdButton" type="button" style="width:100%;margin-top:10px">Submit advertisement</button>
+      </div>
     </div>
   </div>
 
@@ -342,6 +348,45 @@
     document.getElementById("closeModal").addEventListener("click", closeModal);
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    const postForm = document.getElementById("postForm");
+    const adPreview = document.getElementById("adPreview");
+    const adPreviewContent = document.getElementById("adPreviewContent");
+    document.getElementById("previewAdButton").addEventListener("click", () => {
+      if (!postForm.reportValidity()) return;
+      adPreviewContent.replaceChildren();
+      const previewFields = [
+        ["Title", "adTitle"], ["Category", "adCategory"], ["Price", "adPrice"],
+        ["Location", "adLocation"], ["Contact", "adContact"], ["Description", "adDescription"]
+      ];
+      previewFields.forEach(([label, id]) => {
+        const line = document.createElement("p");
+        line.style.margin = "8px 0";
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+        line.append(strong, document.createTextNode(document.getElementById(id).value.trim() || (id === "adPrice" ? "Contact for price" : "")));
+        adPreviewContent.appendChild(line);
+      });
+      const selectedImage = document.getElementById("adImage").files[0];
+      if (selectedImage) {
+        const image = document.createElement("img");
+        image.src = URL.createObjectURL(selectedImage);
+        image.alt = "Advertisement photo preview";
+        image.style.cssText = "display:block;width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin-top:12px";
+        adPreviewContent.appendChild(image);
+      }
+      postForm.style.display = "none";
+      adPreview.style.display = "block";
+    });
+    document.getElementById("editAdButton").addEventListener("click", () => {
+      adPreview.style.display = "none";
+      postForm.style.display = "block";
+    });
+    document.getElementById("confirmAdButton").addEventListener("click", () => {
+      adPreview.style.display = "none";
+      postForm.style.display = "block";
+      postForm.requestSubmit();
+    });
 
     document.getElementById("postForm").addEventListener("submit", async e => {
       e.preventDefault();
