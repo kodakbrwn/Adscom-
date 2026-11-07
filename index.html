@@ -233,6 +233,7 @@
         <div class="field"><label for="adLocation">Location</label><input id="adLocation" required placeholder="City, Country" /></div>
         <div class="field"><label for="adContact">Contact email or phone</label><input id="adContact" required placeholder="How can interested people reach you?" /></div>
         <div class="field"><label for="adDescription">Description</label><textarea id="adDescription" required maxlength="500" placeholder="Describe your product, service or offer..."></textarea></div>
+        <div class="field"><label for="adImage">Advertisement photo (optional)</label><input id="adImage" type="file" accept="image/jpeg,image/png,image/webp" /><small style="color:var(--muted)">Choose JPG, PNG or WebP. Maximum size: 5 MB.</small></div>
         <div class="notice">Your advertisement will be submitted for review by our team before it appears publicly.</div> </div>
         <button class="btn" type="submit" style="width:100%">Preview my ad</button>
       </form>
@@ -290,7 +291,14 @@
         card.className = "ad-card";
         const image = document.createElement("div");
         image.className = "ad-image";
-        image.textContent = ad.emoji || "📣";
+        if (ad.image_url) {
+          const photo = document.createElement("img");
+          photo.src = ad.image_url; photo.alt = ad.title; photo.loading = "lazy";
+          photo.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+          image.append(photo);
+        } else {
+          image.textContent = ad.emoji || "📣";
+        }
         const content = document.createElement("div");
         content.className = "ad-content";
         const meta = document.createElement("div");
@@ -343,6 +351,10 @@
       const location = document.getElementById("adLocation").value.trim();
       const contact = document.getElementById("adContact").value.trim();
       const description = document.getElementById("adDescription").value.trim();
+      const imageFile = document.getElementById("adImage").files[0];
+      if (imageFile && (!["image/jpeg","image/png","image/webp"].includes(imageFile.type) || imageFile.size > 5 * 1024 * 1024)) {
+        alert("Please choose a JPG, PNG or WebP image smaller than 5 MB."); return;
+      }
       const emojiMap = {Electronics:"📱",Vehicles:"🚗",Property:"🏡",Fashion:"👗",Services:"🛠️",Jobs:"💼",Business:"🏢",Other:"🌟"};
 
       if (supabaseReady) {
@@ -350,11 +362,21 @@
           alert("Please log in or create an Adscom account before posting an advertisement.");
           closeModal(); openAuthModal(); return;
         }
+        let imageUrl = null;
+        if (imageFile) {
+          const extension = imageFile.type === "image/png" ? "png" : imageFile.type === "image/webp" ? "webp" : "jpg";
+          const imagePath = `${currentUser.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+          const { error: uploadError } = await db.storage.from("ad-images").upload(imagePath, imageFile, { contentType: imageFile.type, upsert: false });
+          if (uploadError) { alert("Could not upload your photo: " + uploadError.message); return; }
+          const { data: publicImage } = db.storage.from("ad-images").getPublicUrl(imagePath);
+          imageUrl = publicImage.publicUrl;
+        }
         const { error } = await db.from("ads").insert({
-  user_id: currentUser.id,
-  title, category, price, location, contact, description,
-  status: "pending"
-});
+          user_id: currentUser.id,
+          title, category, price, location, contact, description,
+          image_url: imageUrl,
+          status: "pending"
+        });
         if (error) { alert("Could not submit your ad: " + error.message); return; }
         alert("Your advertisement has been submitted and is waiting for review before it appears publicly.");
       } else {
@@ -412,7 +434,7 @@
     }
     async function loadPublishedAds() {
       if (!supabaseReady) return;
-      const { data, error } = await db.from("ads").select("id,title,category,price,location,description,contact,created_at").eq("status","approved").order("created_at",{ascending:false}).limit(60);
+      const { data, error } = await db.from("ads").select("id,title,category,price,location,description,contact,image_url,created_at").eq("status","approved").order("created_at",{ascending:false}).limit(60);
       if (error) { console.warn("Adscom database read:", error.message); return; }
       const emojiMap = {Electronics:"📱",Vehicles:"🚗",Property:"🏡",Fashion:"👗",Services:"🛠️",Jobs:"💼",Business:"🏢",Other:"🌟"};
       const remoteAds = (data || []).map(ad => ({...ad, emoji:emojiMap[ad.category] || "📣"}));
