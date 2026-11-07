@@ -71,6 +71,22 @@
     .price { font-weight: 850; color: var(--brand); }
     .text-link { color: var(--brand); font-weight: 750; font-size: 12px; }
     .empty { grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); background: white; border: 1px dashed #cfd5e2; border-radius: 16px; }
+    .pricing-section { background:#fff; }
+    .pricing-toggle { display:flex; gap:8px; background:#f1f4fa; padding:5px; border-radius:12px; }
+    .pricing-toggle button { border:0; border-radius:9px; padding:9px 15px; background:transparent; color:var(--muted); font-weight:750; cursor:pointer; }
+    .pricing-toggle button.active { background:#fff; color:var(--brand); box-shadow:0 2px 8px #17203312; }
+    .pricing-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .pricing-card { display:flex; flex-direction:column; background:#fff; border:1px solid var(--line); border-radius:17px; padding:22px; min-width:0; }
+    .pricing-card.featured { border:2px solid var(--brand); box-shadow:0 12px 30px #3157d518; }
+    .pricing-card h3 { margin:0 0 7px; font-size:17px; }
+    .pricing-duration { color:var(--muted); font-size:12px; }
+    .pricing-price { font-size:30px; font-weight:850; letter-spacing:-1px; margin:17px 0; color:var(--brand); }
+    .pricing-card ul { padding-left:18px; margin:0 0 20px; color:var(--muted); font-size:12px; line-height:1.9; flex:1; }
+    .pricing-card .btn { width:100%; }
+    .pricing-note { color:var(--muted); font-size:12px; margin:18px 0 0; text-align:center; }
+    @media (max-width:850px) { .pricing-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:560px) { .pricing-grid { grid-template-columns:1fr; } .pricing-toggle { width:100%; } .pricing-toggle button { flex:1; } }
+
     .cta { background: #17233f; color: white; border-radius: 24px; padding: 38px 42px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
     .cta h2 { color: white; }
     .cta p { color: #c3cbe0; margin-bottom: 0; }
@@ -121,6 +137,7 @@
       <nav class="navlinks" aria-label="Main navigation">
         <a href="#categories">Categories</a>
         <a href="#latest">Explore ads</a>
+        <a href="#boost-packages">Boost packages</a>
         <button class="btn btn-outline" id="openAuth">Log in / Sign up</button>
         <button class="btn" id="openPostTop">＋ Post an ad</button>
       </nav>
@@ -172,6 +189,45 @@
           <button class="category" data-category="Business"><span class="emoji">🏢</span><strong>Business</strong></button>
           <button class="category" data-category="Other"><span class="emoji">🌟</span><strong>Other</strong></button>
         </div>
+      </div>
+    </section>
+
+    <section id="boost-packages" class="pricing-section">
+      <div class="container">
+        <div class="section-head">
+          <div><h2>Promote your advertisement</h2><p class="sub">Choose a boost package to give your advertisement more visibility.</p></div>
+          <div class="pricing-toggle" role="group" aria-label="Choose pricing currency">
+            <button type="button" class="active" data-currency="NGN" aria-pressed="true">🇳🇬 NGN</button>
+            <button type="button" data-currency="USD" aria-pressed="false">🌍 USD</button>
+          </div>
+        </div>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3>Basic Boost</h3><div class="pricing-duration">7 days of promotion</div>
+            <div class="pricing-price" data-ngn="₦10,500" data-usd="$7">₦10,500</div>
+            <ul><li>Promoted advertisement</li><li>More visibility for 7 days</li><li>Great for individual sellers</li></ul>
+            <button class="btn btn-outline choose-package" type="button" data-package="Basic Boost" data-duration="7 days">Choose package</button>
+          </article>
+          <article class="pricing-card">
+            <h3>Standard Boost</h3><div class="pricing-duration">14 days of promotion</div>
+            <div class="pricing-price" data-ngn="₦21,000" data-usd="$14">₦21,000</div>
+            <ul><li>Promoted advertisement</li><li>More visibility for 14 days</li><li>For growing sellers</li></ul>
+            <button class="btn btn-outline choose-package" type="button" data-package="Standard Boost" data-duration="14 days">Choose package</button>
+          </article>
+          <article class="pricing-card featured">
+            <h3>Premium Boost</h3><div class="pricing-duration">30 days of promotion</div>
+            <div class="pricing-price" data-ngn="₦45,000" data-usd="$30">₦45,000</div>
+            <ul><li>Promoted advertisement</li><li>More visibility for 30 days</li><li>For serious sellers and services</li></ul>
+            <button class="btn choose-package" type="button" data-package="Premium Boost" data-duration="30 days">Choose package</button>
+          </article>
+          <article class="pricing-card">
+            <h3>Business Pro</h3><div class="pricing-duration">30 days of promotion</div>
+            <div class="pricing-price" data-ngn="₦60,000" data-usd="$40">₦60,000</div>
+            <ul><li>Business-focused promotion</li><li>More visibility for 30 days</li><li>For established businesses</li></ul>
+            <button class="btn btn-outline choose-package" type="button" data-package="Business Pro" data-duration="30 days">Choose package</button>
+          </article>
+        </div>
+        <p class="pricing-note">Posting a standard advertisement remains free. Payment is only for optional promotion.</p>
       </div>
     </section>
 
@@ -369,6 +425,30 @@
         grid.append(card);
       });
     }
+
+    let pricingCurrency = "NGN";
+    document.querySelectorAll("[data-currency]").forEach(button => {
+      button.addEventListener("click", () => {
+        pricingCurrency = button.dataset.currency;
+        document.querySelectorAll("[data-currency]").forEach(option => {
+          const active = option === button;
+          option.classList.toggle("active", active);
+          option.setAttribute("aria-pressed", String(active));
+        });
+        document.querySelectorAll(".pricing-price").forEach(price => {
+          price.textContent = price.dataset[pricingCurrency.toLowerCase()];
+        });
+      });
+    });
+    document.querySelectorAll(".choose-package").forEach(button => {
+      button.addEventListener("click", () => {
+        const packageName = button.dataset.package;
+        const duration = button.dataset.duration;
+        const card = button.closest(".pricing-card");
+        const price = card.querySelector(".pricing-price").textContent;
+        alert(packageName + " selected (" + duration + ") — " + price + ". Online checkout is not connected yet. You can still post a standard advertisement for free.");
+      });
+    });
 
     document.getElementById("categoryList").addEventListener("click", e => {
       const button = e.target.closest("[data-category]");
