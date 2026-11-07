@@ -317,7 +317,7 @@
         const row = document.createElement("div"); row.className = "price-row";
         const price = document.createElement("span"); price.className = "price"; price.textContent = ad.price || "Contact for price";
         const contact = document.createElement("a"); contact.className = "text-link"; contact.href = "#"; contact.textContent = "View details →";
-        contact.addEventListener("click", e => { e.preventDefault(); alert(`${ad.title}\\n\\n${ad.description}\\n\\nLocation: ${ad.location}\\nPrice: ${ad.price || "Contact for price"}\\n\\nContact details will be available when Adscom has its live listing system.`); });
+        contact.addEventListener("click", e => { e.preventDefault(); alert(`${ad.title}\n\n${ad.description}\n\nCategory: ${ad.category}\nLocation: ${ad.location}\nPrice: ${ad.price || "Contact for price"}\nContact: ${ad.contact || "Not provided"}`); });
         row.append(price, contact);
         content.append(meta, title, desc, row);
         card.append(image, content);
