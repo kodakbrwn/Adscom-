@@ -337,7 +337,7 @@
           description.textContent = ad.description || "";
           description.style.cssText = "line-height:1.6;white-space:pre-wrap;";
           const info = document.createElement("p");
-          info.textContent = "Category: " + (ad.category || "Not provided") + "\\nLocation: " + (ad.location || "Not provided") + "\\nPrice: " + (ad.price || "Contact for price");
+          info.textContent = "Category: " + (ad.category || "Not provided") + "\nLocation: " + (ad.location || "Not provided") + "\nPrice: " + (ad.price || "Contact for price");
           info.style.cssText = "line-height:1.8;white-space:pre-line;color:#475569;";
           const contactLabel = document.createElement("p");
           contactLabel.textContent = "Contact the advertiser:";
@@ -345,7 +345,7 @@
           const contactLink = document.createElement("a");
           const contactValue = String(ad.contact || "").trim();
           contactLink.textContent = contactValue || "Contact not provided";
-          contactLink.style.cssText = "display:inline-block;color:#0759c7;font-weight:700;overflow-wrap:anywhere;";
+          contactLink.style.cssText = "display:block;margin-bottom:16px;color:#0759c7;font-weight:700;overflow-wrap:anywhere;";
           if (contactValue.includes("@")) contactLink.href = "mailto:" + contactValue;
           else if (contactValue) contactLink.href = "tel:" + contactValue.replace(/[^+0-9]/g, "");
           const done = document.createElement("button");
