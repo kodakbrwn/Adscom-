@@ -441,14 +441,83 @@
       });
     });
     document.querySelectorAll(".choose-package").forEach(button => {
-      button.addEventListener("click", () => {
-        const packageName = button.dataset.package;
-        const duration = button.dataset.duration;
-        const card = button.closest(".pricing-card");
-        const price = card.querySelector(".pricing-price").textContent;
-        alert(packageName + " selected (" + duration + ") — " + price + ". Online checkout is not connected yet. You can still post a standard advertisement for free.");
+      button.addEventListener("click", async () => {
+        if (!db || !currentUser) {
+          alert("Please log in to Adscom before purchasing a boost package.");
+          return;
+        }
+        if (pricingCurrency !== "NGN") {
+          alert("Checkout currently accepts NGN only. Switch the price display to NGN to continue.");
+          return;
+        }
+
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = "Loading…";
+        try {
+          const { data: userAds, error: adsError } = await db.from("ads")
+            .select("id,title,status").eq("user_id", currentUser.id)
+            .order("created_at", { ascending: false });
+          if (adsError) throw adsError;
+          if (!userAds?.length) {
+            alert("Post an advertisement first, then choose a boost package.");
+            return;
+          }
+
+          const choices = userAds.map((ad, i) => `${i + 1}. ${ad.title} (${ad.status})`).join("\n");
+          const answer = prompt(`Enter the number of the advertisement to promote:\n\n${choices}`);
+          if (answer === null) return;
+          const selectedIndex = Number(answer) - 1;
+          if (!Number.isInteger(selectedIndex) || selectedIndex < 0 || selectedIndex >= userAds.length) {
+            alert("That advertisement number is not valid.");
+            return;
+          }
+
+          const { data, error } = await db.functions.invoke("initialize-ad-payment", {
+            body: { ad_id: userAds[selectedIndex].id, package: button.dataset.package }
+          });
+          if (error) throw error;
+          if (!data?.success || !data?.authorization_url) {
+            throw new Error(data?.error || "Could not start checkout.");
+          }
+          window.location.assign(data.authorization_url);
+        } catch (error) {
+          alert("Payment could not be started: " + (error?.message || "Please try again."));
+        } finally {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
       });
     });
+
+    // Verify a Paystack return with the server before treating the promotion as paid.
+    (async function verifyReturnedAdscomPayment() {
+      if (!db) return;
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get("reference");
+      if (params.get("adscom_payment") !== "verify" || !reference) return;
+
+      try {
+        const { data: sessionData } = await db.auth.getSession();
+        if (!sessionData?.session) {
+          alert("Your payment return was received. Please log in with the same Adscom account to verify it. Keep this page open.");
+          return;
+        }
+        const { data, error } = await db.functions.invoke("verify-ad-payment", {
+          body: { reference }
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || "Verification is pending.");
+        alert("Payment verified. Your advertisement promotion is now active.");
+
+        params.delete("adscom_payment");
+        params.delete("reference");
+        const remainingQuery = params.toString();
+        history.replaceState({}, document.title, window.location.pathname + (remainingQuery ? "?" + remainingQuery : "") + window.location.hash);
+      } catch (error) {
+        alert((error?.message || "We could not verify this payment yet.") + " Keep your payment reference: " + reference);
+      }
+    })();
 
     document.getElementById("categoryList").addEventListener("click", e => {
       const button = e.target.closest("[data-category]");
